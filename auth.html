@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Mafia Store Login</title>
+  <title>Mafia Login</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body style="text-align:center; font-family:sans-serif; padding:50px;">
+
   <h2>Login to Mafia Store 🕶️</h2>
 
   <input type="email" id="email" placeholder="Enter your email" style="padding:10px; width:250px;"><br><br>
-  <button onclick="loginWithEmail()" style="padding:10px 20px;">Login via Magic Link</button>
+  <button id="loginBtn" style="padding:10px 20px;">Login via Magic Link</button>
 
   <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
@@ -18,10 +19,11 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqcWt6bmplanB6d25jb2VseXZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTg2MDgsImV4cCI6MjA2ODY3NDYwOH0.2B4HcfnDXolf7YUAaoHx5Ax2XK1pQRmcfdFl-zq4CSY'
     );
 
-    async function loginWithEmail() {
-      const email = document.getElementById("email").value;
+    document.getElementById("loginBtn").addEventListener("click", async () => {
+      const email = document.getElementById("email").value.trim();
+
       if (!email) {
-        alert("Please enter your email");
+        alert("❌ Please enter your email");
         return;
       }
 
@@ -32,13 +34,14 @@
       } else {
         alert("✅ Magic link sent! Check your inbox.");
       }
-    }
-
-    supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN") {
-        window.location.href = "dashboard.html"; // Redirect after login
-      }
     });
+
+    // Auto redirect if already logged in
+    const session = await supabase.auth.getSession();
+    if (session.data.session) {
+      window.location.href = "index.html";
+    }
   </script>
+
 </body>
 </html>
