@@ -9,9 +9,37 @@
 <body style="font-family:sans-serif; text-align:center; padding:50px;">
 
   <h1>Welcome to Mafia Store 🛒😎</h1>
-  <p><a href="auth.html">🔐 Login to your account</a></p>
-  <p><a href="profile.html">📋 Complete your profile</a></p>
 
-  <script src="assets/js/app.js"></script>
+  <div id="not-logged-in">
+    <p><a href="auth.html">🔐 Login to your account</a></p>
+  </div>
+
+  <div id="logged-in" style="display:none;">
+    <p><a href="profile.html">📋 Complete your profile</a></p>
+    <p><button onclick="logout()">🚪 Logout</button></p>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+    const supabase = createClient(
+      'https://vjqkznjejpzwncoelyvd.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqcWt6bmplanB6d25jb2VseXZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTg2MDgsImV4cCI6MjA2ODY3NDYwOH0.2B4HcfnDXolf7YUAaoHx5Ax2XK1pQRmcfdFl-zq4CSY'
+    );
+
+    const user = await supabase.auth.getUser();
+
+    if (user.data.user) {
+      // Logged in
+      document.getElementById("not-logged-in").style.display = "none";
+      document.getElementById("logged-in").style.display = "block";
+    }
+
+    window.logout = async function() {
+      await supabase.auth.signOut();
+      location.reload();
+    }
+  </script>
+
 </body>
 </html>
