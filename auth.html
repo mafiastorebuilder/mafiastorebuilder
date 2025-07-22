@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mafia Store Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body style="text-align:center; font-family:sans-serif; padding:50px;">
+  <h2>Login to Mafia Store 🕶️</h2>
+
+  <input type="email" id="email" placeholder="Enter your email" style="padding:10px; width:250px;"><br><br>
+  <button onclick="loginWithEmail()" style="padding:10px 20px;">Login via Magic Link</button>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+    const supabase = createClient(
+      'https://vjqkznjejpzwncoelyvd.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqcWt6bmplanB6d25jb2VseXZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTg2MDgsImV4cCI6MjA2ODY3NDYwOH0.2B4HcfnDXolf7YUAaoHx5Ax2XK1pQRmcfdFl-zq4CSY'
+    );
+
+    async function loginWithEmail() {
+      const email = document.getElementById("email").value;
+      if (!email) {
+        alert("Please enter your email");
+        return;
+      }
+
+      const { error } = await supabase.auth.signInWithOtp({ email });
+
+      if (error) {
+        alert("❌ Error: " + error.message);
+      } else {
+        alert("✅ Magic link sent! Check your inbox.");
+      }
+    }
+
+    supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN") {
+        window.location.href = "dashboard.html"; // Redirect after login
+      }
+    });
+  </script>
+</body>
+</html>
