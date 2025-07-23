@@ -3,7 +3,40 @@
 <head>
   <meta charset="UTF-8" />
   <title>Mafia Store Login 🛒</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+    const SUPABASE_URL = "https://vjqkznjejpzwncoelyvd.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqcWt6bmplanB6d25jb2VseXZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTg2MDgsImV4cCI6MjA2ODY3NDYwOH0.2B4HcfnDXolf7YUAaoHx5Ax2XK1pQRmcfdFl-zq4CSY";
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const emailInput = document.getElementById("email");
+      const savedEmail = localStorage.getItem("user_email");
+      if (savedEmail) {
+        emailInput.value = savedEmail;
+      }
+
+      document.getElementById("login-form").addEventListener("submit", async function(e) {
+        e.preventDefault();
+
+        const email = emailInput.value.trim();
+        if (!email) return alert("❌ Please enter your email");
+
+        localStorage.setItem("user_email", email);
+
+        // Supabase insert (prevent duplicate errors)
+        const { error } = await supabase.from("users").insert([{ email }]);
+        if (error && error.code !== "23505") {
+          alert("❌ Supabase error: " + error.message);
+          return;
+        }
+
+        window.location.href = "profile.html";
+      });
+    });
+  </script>
   <style>
     body {
       background: #0f172a;
@@ -37,45 +70,9 @@
 </head>
 <body>
   <h1>Welcome to Mafia Store 🛒😎</h1>
-
   <form id="login-form">
     <input type="email" id="email" placeholder="Enter your email" required /><br />
     <button type="submit">Save & Continue</button>
   </form>
-
-  <script>
-    const SUPABASE_URL = "https://vjqkznjejpzwncoelyvd.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqcWt6bmplanB6d25jb2VseXZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTg2MDgsImV4cCI6MjA2ODY3NDYwOH0.2B4HcfnDXolf7YUAaoHx5Ax2XK1pQRmcfdFl-zq4CSY";
-
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    window.onload = () => {
-      const savedEmail = localStorage.getItem("user_email");
-      if (savedEmail) {
-        document.getElementById("email").value = savedEmail;
-      }
-    };
-
-    document.getElementById('login-form').addEventListener('submit', async function(e) {
-      e.preventDefault();
-
-      const email = document.getElementById('email').value.trim();
-      if (!email) return alert("Please enter your email.");
-
-      // ✅ Save email locally for profile.html
-      localStorage.setItem("user_email", email);
-
-      // ✅ Insert into Supabase (skip if already exists)
-      const { error } = await supabase.from('users').insert([{ email }]);
-
-      if (error && error.code !== '23505') {
-        alert("❌ Error: " + error.message);
-        return;
-      }
-
-      // ✅ Redirect to profile page
-      window.location.href = "profile.html";
-    });
-  </script>
 </body>
 </html>
