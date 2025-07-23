@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Mafia User Profile</title>
+  <title>Mafia Store User Verification</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     img.preview {
@@ -14,10 +14,6 @@
       padding: 20px;
       max-width: 500px;
       margin: auto;
-      background: #f4f4f4;
-    }
-    h2 {
-      text-align: center;
     }
   </style>
 </head>
@@ -27,30 +23,30 @@
 
   <form id="profileForm">
     <label>Business Name:</label><br>
-    <input type="text" id="business" required><br><br>
+    <input type="text" id="Business_Name" required><br><br>
 
     <label>Full Name:</label><br>
-    <input type="text" id="fullname" required><br><br>
+    <input type="text" id="Full_Name" required><br><br>
 
-    <label>Father/Husband Name:</label><br>
-    <input type="text" id="guardian" required><br><br>
+    <label>Father's or Husband's Name:</label><br>
+    <input type="text" id="Fathers_or_Husbands_Name" required><br><br>
 
-    <label>CNIC Number:</label><br>
-    <input type="text" id="cnic" placeholder="35201-1234567-1" required><br><br>
+    <label>CNIC Number (e.g. 35201-XXXXXXX-X):</label><br>
+    <input type="text" id="CNIC_Number" required><br><br>
 
     <label>Complete Address:</label><br>
-    <textarea id="address" required></textarea><br><br>
+    <textarea id="Complete_Address" required></textarea><br><br>
 
     <label>Upload Face Photo:</label><br>
-    <input type="file" id="face" accept="image/*" required><br>
+    <input type="file" id="Face_Photo" accept="image/*" required><br>
     <img id="facePreview" class="preview"><br>
 
-    <label>Upload CNIC Front:</label><br>
-    <input type="file" id="cnicFront" accept="image/*" required><br>
+    <label>Upload CNIC Front Side:</label><br>
+    <input type="file" id="CNIC_Front_Side" accept="image/*" required><br>
     <img id="frontPreview" class="preview"><br>
 
-    <label>Upload CNIC Back:</label><br>
-    <input type="file" id="cnicBack" accept="image/*" required><br>
+    <label>Upload CNIC Back Side:</label><br>
+    <input type="file" id="CNIC_Back_Side" accept="image/*" required><br>
     <img id="backPreview" class="preview"><br>
 
     <button type="submit">Submit</button>
@@ -64,56 +60,52 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqcWt6bmplanB6d25jb2VseXZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTg2MDgsImV4cCI6MjA2ODY3NDYwOH0.2B4HcfnDXolf7YUAaoHx5Ax2XK1pQRmcfdFl-zq4CSY'
     );
 
-    function previewImage(inputId, previewId) {
-      const file = document.getElementById(inputId).files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function () {
-        document.getElementById(previewId).src = reader.result;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    document.getElementById("face").addEventListener("change", () => previewImage("face", "facePreview"));
-    document.getElementById("cnicFront").addEventListener("change", () => previewImage("cnicFront", "frontPreview"));
-    document.getElementById("cnicBack").addEventListener("change", () => previewImage("cnicBack", "backPreview"));
-
-    document.getElementById("profileForm").addEventListener("submit", async function (e) {
+    document.getElementById("profileForm").addEventListener("submit", async function(e) {
       e.preventDefault();
 
       try {
         const email = localStorage.getItem("userEmail");
         if (!email) return alert("❌ Please login first");
 
-        const folder = email.replace(/[^a-zA-Z0-9]/g, "_");
+        const uid = email.replace(/[^a-zA-Z0-9]/g, "_");
 
-        const business = document.getElementById("business").value;
-        const fullname = document.getElementById("fullname").value;
-        const guardian = document.getElementById("guardian").value;
-        const cnic = document.getElementById("cnic").value;
-        const address = document.getElementById("address").value;
+        const Business_Name = document.getElementById("Business_Name").value;
+        const Full_Name = document.getElementById("Full_Name").value;
+        const Fathers_or_Husbands_Name = document.getElementById("Fathers_or_Husbands_Name").value;
+        const CNIC_Number = document.getElementById("CNIC_Number").value;
+        const Complete_Address = document.getElementById("Complete_Address").value;
 
-        async function uploadFile(inputId, fileName) {
-          const file = document.getElementById(inputId).files[0];
-          const { data, error } = await supabase.storage.from("users").upload(`${folder}/${fileName}`, file, { upsert: true });
+        async function uploadFile(inputId, path, previewId) {
+          const fileInput = document.getElementById(inputId);
+          const file = fileInput.files[0];
+          if (!file) throw new Error(`Missing file for ${path}`);
+
+          const reader = new FileReader();
+          reader.onload = function () {
+            const img = document.getElementById(previewId);
+            if (img) img.src = reader.result;
+          };
+          reader.readAsDataURL(file);
+
+          const { data, error } = await supabase.storage.from("users").upload(`${uid}/${path}`, file, { upsert: true });
           if (error) throw error;
           return data.path;
         }
 
-        const facePath = await uploadFile("face", "face.jpg");
-        const frontPath = await uploadFile("cnicFront", "cnic-front.jpg");
-        const backPath = await uploadFile("cnicBack", "cnic-back.jpg");
+        const face_img = await uploadFile("Face_Photo", "face.jpg", "facePreview");
+        const cnic_front = await uploadFile("CNIC_Front_Side", "cnic-front.jpg", "frontPreview");
+        const cnic_back = await uploadFile("CNIC_Back_Side", "cnic-back.jpg", "backPreview");
 
         const { error } = await supabase.from("users").upsert({
-          email, // primary key
-          business,
-          fullname,
-          guardian,
-          cnic,
-          address,
-          face_img: facePath,
-          cnic_front: frontPath,
-          cnic_back: backPath,
+          email,
+          "Business Name": Business_Name,
+          "Full Name": Full_Name,
+          "Father's or Husband's Name": Fathers_or_Husbands_Name,
+          "CNIC Number (e.g. 35201-XXXXXXX-X)": CNIC_Number,
+          "Complete Address": Complete_Address,
+          "Face Photo": face_img,
+          "CNIC Front Side": cnic_front,
+          "CNIC Back Side": cnic_back,
         });
 
         if (error) throw error;
@@ -122,10 +114,11 @@
         window.location.href = "dashboard.html";
 
       } catch (err) {
-        console.error(err);
+        console.error("❌ JS Error:", err);
         alert("❌ Error: " + err.message);
       }
     });
   </script>
+
 </body>
 </html>
