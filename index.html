@@ -2,70 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Mafia Store Login 🛒</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body {
-      background: #0f172a;
-      color: #f8fafc;
-      font-family: 'Segoe UI', sans-serif;
-      text-align: center;
-      padding: 60px 20px;
-    }
-    input {
-      padding: 12px 20px;
-      font-size: 1rem;
-      border-radius: 8px;
-      border: none;
-      width: 300px;
-      max-width: 90%;
-      margin-bottom: 20px;
-    }
-    button {
-      background: #22c55e;
-      color: black;
-      padding: 12px 30px;
-      border-radius: 8px;
-      border: none;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #16a34a;
-    }
-  </style>
+  <meta http-equiv="refresh" content="0; url=login.html" />
+  <title>Redirecting...</title>
 </head>
-<body>
-  <h1>Welcome to Mafia Store 🛒😎</h1>
-
-  <form id="login-form">
-    <input type="email" id="email" placeholder="Enter your email" required />
-    <br />
-    <button type="submit">Save & Continue</button>
-  </form>
-
-  <script>
-    const SUPABASE_URL = "https://vjqkznjejpzwncoelyvd.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqcWt6bmplanB6d25jb2VseXZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTg2MDgsImV4cCI6MjA2ODY3NDYwOH0.2B4HcfnDXolf7YUAaoHx5Ax2XK1pQRmcfdFl-zq4CSY";
-
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    document.getElementById("login-form").addEventListener("submit", async function(e) {
-      e.preventDefault();
-      const email = document.getElementById("email").value.trim();
-
-      if (!email) return alert("❌ Please enter your email");
-
-      // Save in localStorage
-      localStorage.setItem("userEmail", email);
-
-      // Optional: insert into database if needed
-      await supabase.from("users").upsert([{ email }]);
-
-      // Redirect to profile page
-      window.location.href = "profile.html";
-    });
-  </script>
+<body style="text-align:center; font-family:sans-serif; padding:50px;">
+  <h2>Redirecting to Login Page... 🔐</h2>
+  <p>If you are not redirected, <a href="login.html">click here</a>.</p>
 </body>
 </html>
