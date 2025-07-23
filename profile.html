@@ -4,97 +4,92 @@
   <title>Mafia User Profile</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-      max-width: 500px;
-      margin: auto;
-    }
-    label {
-      font-weight: bold;
-    }
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-    }
-    button {
-      background-color: #22c55e;
-      color: white;
-      padding: 12px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      width: 100%;
-    }
-    button:hover {
-      background-color: #16a34a;
+    img.preview {
+      width: 100px;
+      margin-top: 10px;
+      display: block;
     }
   </style>
 </head>
-<body>
+<body style="font-family:sans-serif; padding:20px; max-width:500px; margin:auto;">
 
   <h2>Mafia Store User Verification 🕵️‍♂️</h2>
 
   <form id="profileForm">
-    <label>Business Name:</label>
-    <input type="text" id="business" required>
+    <label>Business Name:</label><br>
+    <input type="text" id="business" required><br><br>
 
-    <label>Full Name:</label>
-    <input type="text" id="fullname" required>
+    <label>Full Name:</label><br>
+    <input type="text" id="fullname" required><br><br>
 
-    <label>Father/Husband Name:</label>
-    <input type="text" id="guardian" required>
+    <label>Father/Husband Name:</label><br>
+    <input type="text" id="guardian" required><br><br>
 
-    <label>CNIC Number:</label>
-    <input type="text" id="cnic" placeholder="35201-1234567-1" required>
+    <label>CNIC Number:</label><br>
+    <input type="text" id="cnic" placeholder="35201-1234567-1" required><br><br>
 
-    <label>Complete Address:</label>
-    <textarea id="address" required></textarea>
+    <label>Complete Address:</label><br>
+    <textarea id="address" required></textarea><br><br>
 
-    <label>Upload Face Photo:</label>
-    <input type="file" id="face" accept="image/*" required>
+    <label>Upload Face Photo:</label><br>
+    <input type="file" id="face" accept="image/*" required><br>
+    <img id="facePreview" class="preview"><br>
 
-    <label>Upload CNIC Front:</label>
-    <input type="file" id="cnicFront" accept="image/*" required>
+    <label>Upload CNIC Front:</label><br>
+    <input type="file" id="cnicFront" accept="image/*" required><br>
+    <img id="frontPreview" class="preview"><br>
 
-    <label>Upload CNIC Back:</label>
-    <input type="file" id="cnicBack" accept="image/*" required>
+    <label>Upload CNIC Back:</label><br>
+    <input type="file" id="cnicBack" accept="image/*" required><br>
+    <img id="backPreview" class="preview"><br>
 
     <button type="submit">Submit</button>
   </form>
 
   <script type="module">
-    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
     const supabase = createClient(
       'https://vjqkznjejpzwncoelyvd.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqcWt6bmplanB6d25jb2VseXZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTg2MDgsImV4cCI6MjA2ODY3NDYwOH0.2B4HcfnDXolf7YUAaoHx5Ax2XK1pQRmcfdFl-zq4CSY'
     );
 
-    // 🔐 Force Login Check
-    const email = localStorage.getItem("user_email");
-if (!email) return alert("❌ Please login first");
+    // 👁️ Show preview images
+    const previewImage = (inputId, imgId) => {
+      const input = document.getElementById(inputId);
+      const img = document.getElementById(imgId);
+      input.addEventListener("change", () => {
+        const file = input.files[0];
+        if (file) {
+          img.src = URL.createObjectURL(file);
+        }
+      });
+    };
 
-      window.location.href = "index.html";
-    }
+    previewImage("face", "facePreview");
+    previewImage("cnicFront", "frontPreview");
+    previewImage("cnicBack", "backPreview");
 
-    const uid = email.replace(/[^a-zA-Z0-9]/g, "_"); // Clean ID
-
+    // 🔐 Form submission
     document.getElementById("profileForm").addEventListener("submit", async function(e) {
       e.preventDefault();
 
       try {
-        const business = document.getElementById("business").value.trim();
-        const fullname = document.getElementById("fullname").value.trim();
-        const guardian = document.getElementById("guardian").value.trim();
-        const cnic = document.getElementById("cnic").value.trim();
-        const address = document.getElementById("address").value.trim();
+        const email = localStorage.getItem("userEmail");
+        if (!email) return alert("❌ Please login first");
 
-        async function uploadFile(inputId, filename) {
+        const uid = email.replace(/[^a-zA-Z0-9]/g, "_");
+
+        const business = document.getElementById("business").value;
+        const fullname = document.getElementById("fullname").value;
+        const guardian = document.getElementById("guardian").value;
+        const cnic = document.getElementById("cnic").value;
+        const address = document.getElementById("address").value;
+
+        async function uploadFile(inputId, path) {
           const file = document.getElementById(inputId).files[0];
-          if (!file) throw new Error(`Missing file: ${inputId}`);
-          const { data, error } = await supabase.storage.from("users").upload(`${uid}/${filename}`, file, { upsert: true });
+          if (!file) throw new Error(`Missing file for ${path}`);
+          const { data, error } = await supabase.storage.from("users").upload(`${uid}/${path}`, file, { upsert: true });
           if (error) throw error;
           return data.path;
         }
@@ -113,7 +108,7 @@ if (!email) return alert("❌ Please login first");
           address,
           face_img: facePath,
           cnic_front: frontPath,
-          cnic_back: backPath
+          cnic_back: backPath,
         });
 
         if (error) throw error;
@@ -123,10 +118,9 @@ if (!email) return alert("❌ Please login first");
 
       } catch (err) {
         console.error("❌ JS Error:", err);
-        alert("❌ " + err.message);
+        alert("❌ Error: " + err.message);
       }
     });
   </script>
-
 </body>
 </html>
