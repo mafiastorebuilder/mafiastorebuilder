@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>Mafia Store Login 🛒</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
       background: #0f172a;
@@ -12,11 +13,7 @@
       text-align: center;
       padding: 60px 20px;
     }
-    h1 {
-      font-size: 2.2rem;
-      margin-bottom: 20px;
-    }
-    input[type="email"] {
+    input {
       padding: 12px 20px;
       font-size: 1rem;
       border-radius: 8px;
@@ -43,7 +40,8 @@
   <h1>Welcome to Mafia Store 🛒😎</h1>
 
   <form id="login-form">
-    <input type="email" id="email" placeholder="Enter your email" required /><br />
+    <input type="email" id="email" placeholder="Enter your email" required />
+    <br />
     <button type="submit">Save & Continue</button>
   </form>
 
@@ -53,31 +51,19 @@
 
     const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // ✅ Auto-fill email from localStorage
-    window.onload = () => {
-      const savedEmail = localStorage.getItem("userEmail");
-      if (savedEmail) {
-        document.getElementById("email").value = savedEmail;
-      }
-    };
-
-    document.getElementById("login-form").addEventListener("submit", async function (e) {
+    document.getElementById("login-form").addEventListener("submit", async function(e) {
       e.preventDefault();
-
       const email = document.getElementById("email").value.trim();
-      if (!email) {
-        alert("❌ Enter a valid email");
-        return;
-      }
 
-      // ✅ Save to Supabase DB if not exists
-      await supabase.from("users").upsert({ email });
+      if (!email) return alert("❌ Please enter your email");
 
-      // ✅ Save session locally
+      // Save in localStorage
       localStorage.setItem("userEmail", email);
-      sessionStorage.setItem("loggedIn", "true");
 
-      // ✅ Redirect to profile.html
+      // Optional: insert into database if needed
+      await supabase.from("users").upsert([{ email }]);
+
+      // Redirect to profile page
       window.location.href = "profile.html";
     });
   </script>
