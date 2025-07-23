@@ -3,36 +3,41 @@
 <head>
   <meta charset="UTF-8" />
   <title>Mafia Store Login 🛒</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script type="module">
-    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-    const SUPABASE_URL = "https://vjqkznjejpzwncoelyvd.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqcWt6bmplanB6d25jb2VseXZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTg2MDgsImV4cCI6MjA2ODY3NDYwOH0.2B4HcfnDXolf7YUAaoHx5Ax2XK1pQRmcfdFl-zq4CSY";
+    const supabase = createClient(
+      "https://vjqkznjejpzwncoelyvd.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqcWt6bmplanB6d25jb2VseXZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTg2MDgsImV4cCI6MjA2ODY3NDYwOH0.2B4HcfnDXolf7YUAaoHx5Ax2XK1pQRmcfdFl-zq4CSY"
+    );
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    window.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("login-form");
       const emailInput = document.getElementById("email");
+
+      // Auto-fill email if saved
       const savedEmail = localStorage.getItem("user_email");
       if (savedEmail) {
         emailInput.value = savedEmail;
       }
 
-      document.getElementById("login-form").addEventListener("submit", async function(e) {
+      form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         const email = emailInput.value.trim();
-        if (!email) return alert("❌ Please enter your email");
+        if (!email) return alert("❌ Please enter your email.");
 
+        // Save to localStorage
         localStorage.setItem("user_email", email);
 
-        // Supabase insert (prevent duplicate errors)
+        // Insert in Supabase (ignore duplicate error)
         const { error } = await supabase.from("users").insert([{ email }]);
         if (error && error.code !== "23505") {
-          alert("❌ Supabase error: " + error.message);
-          return;
+          return alert("❌ Supabase error: " + error.message);
         }
 
+        // Redirect to profile.html
         window.location.href = "profile.html";
       });
     });
@@ -45,12 +50,16 @@
       text-align: center;
       padding: 60px 20px;
     }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
     input[type="email"] {
       padding: 12px 20px;
       font-size: 1rem;
       border-radius: 8px;
       border: none;
-      width: 300px;
+      width: 280px;
       max-width: 90%;
       margin-bottom: 20px;
     }
