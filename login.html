@@ -29,7 +29,7 @@
         if (!email) return alert("❌ Please enter your email.");
 
         // Save to localStorage
-        localStorage.setItem("user_email", email);
+        localStorage.setItem("userEmail", email);
 
         // Insert in Supabase (ignore duplicate error)
         const { error } = await supabase.from("users").insert([{ email }]);
