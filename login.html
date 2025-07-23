@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <title>Mafia Store Login 🛒</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
       background: #0f172a;
@@ -13,7 +12,7 @@
       text-align: center;
       padding: 60px 20px;
     }
-    input {
+    input[type="email"] {
       padding: 12px 20px;
       font-size: 1rem;
       border-radius: 8px;
@@ -40,8 +39,7 @@
   <h1>Welcome to Mafia Store 🛒😎</h1>
 
   <form id="login-form">
-    <input type="email" id="email" placeholder="Enter your email" required />
-    <br />
+    <input type="email" id="email" placeholder="Enter your email" required /><br />
     <button type="submit">Save & Continue</button>
   </form>
 
@@ -51,21 +49,31 @@
 
     const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    document.getElementById("login-form").addEventListener("submit", async function(e) {
+    window.onload = () => {
+      const savedEmail = localStorage.getItem("user_email");
+      if (savedEmail) {
+        document.getElementById("email").value = savedEmail;
+      }
+    };
+
+    document.getElementById('login-form').addEventListener('submit', async function(e) {
       e.preventDefault();
-      const email = document.getElementById("email").value.trim();
 
-      if (!email) return alert("❌ Please enter your email");
+      const email = document.getElementById('email').value.trim();
+      if (!email) return alert("Please enter your email.");
 
-      localStorage.setItem("userEmail", email);
+      // ✅ Save email locally for profile.html
+      localStorage.setItem("user_email", email);
 
-      // Optional insert if not already in table
-      const { error } = await supabase.from("users").upsert([{ email }]);
+      // ✅ Insert into Supabase (skip if already exists)
+      const { error } = await supabase.from('users').insert([{ email }]);
+
       if (error && error.code !== '23505') {
-        alert("❌ Database error: " + error.message);
+        alert("❌ Error: " + error.message);
         return;
       }
 
+      // ✅ Redirect to profile page
       window.location.href = "profile.html";
     });
   </script>
