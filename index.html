@@ -33,7 +33,6 @@
       border: none;
       font-size: 1rem;
       cursor: pointer;
-      margin-top: 10px;
     }
     button:hover {
       background: #16a34a;
@@ -54,7 +53,7 @@
 
     const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Auto-fill saved email
+    // ✅ Auto-fill email from localStorage
     window.onload = () => {
       const savedEmail = localStorage.getItem("userEmail");
       if (savedEmail) {
@@ -62,20 +61,24 @@
       }
     };
 
-    document.getElementById('login-form').addEventListener('submit', async function(e) {
+    document.getElementById("login-form").addEventListener("submit", async function (e) {
       e.preventDefault();
 
-      const email = document.getElementById('email').value;
-
-      // Save to Supabase
-      const { error } = await supabase.from('users').insert([{ email }]);
-
-      if (error && error.code !== '23505') {
-        alert("❌ Login failed: " + error.message);
-      } else {
-        localStorage.setItem("userEmail", email);
-        window.location.href = "profile.html";
+      const email = document.getElementById("email").value.trim();
+      if (!email) {
+        alert("❌ Enter a valid email");
+        return;
       }
+
+      // ✅ Save to Supabase DB if not exists
+      await supabase.from("users").upsert({ email });
+
+      // ✅ Save session locally
+      localStorage.setItem("userEmail", email);
+      sessionStorage.setItem("loggedIn", "true");
+
+      // ✅ Redirect to profile.html
+      window.location.href = "profile.html";
     });
   </script>
 </body>
