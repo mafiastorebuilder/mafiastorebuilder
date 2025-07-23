@@ -37,69 +37,61 @@
   </form>
 
   <script type="module">
-    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-    const supabase = createClient(
-      'https://vjqkznjejpzwncoelyvd.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqcWt6bmplanB6d25jb2VseXZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTg2MDgsImV4cCI6MjA2ODY3NDYwOH0.2B4HcfnDXolf7YUAaoHx5Ax2XK1pQRmcfdFl-zq4CSY'
-    );
+  const supabase = createClient(
+    'https://vjqkznjejpzwncoelyvd.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqcWt6bmplanB6d25jb2VseXZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTg2MDgsImV4cCI6MjA2ODY3NDYwOH0.2B4HcfnDXolf7YUAaoHx5Ax2XK1pQRmcfdFl-zq4CSY'
+  );
 
-    const form = document.getElementById("profileForm");
+  document.getElementById("profileForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
 
-    form.addEventListener("submit", async function(e) {
-      e.preventDefault();
-
-      // Get saved email from localStorage
+    try {
       const email = localStorage.getItem("user_email");
       if (!email) return alert("❌ Please login first");
 
-      // Generate a safe UID from email
       const uid = email.replace(/[^a-zA-Z0-9]/g, "_");
 
-      // Get values
       const business = document.getElementById("business").value;
       const fullname = document.getElementById("fullname").value;
       const guardian = document.getElementById("guardian").value;
       const cnic = document.getElementById("cnic").value;
       const address = document.getElementById("address").value;
 
-      // Upload images
       async function uploadFile(inputId, path) {
         const file = document.getElementById(inputId).files[0];
-        if (!file) throw new Error(`❌ Missing file for ${path}`);
+        if (!file) throw new Error(`Missing file for ${path}`);
         const { data, error } = await supabase.storage.from("users").upload(`${uid}/${path}`, file, { upsert: true });
         if (error) throw error;
         return data.path;
       }
 
-      try {
-        const facePath = await uploadFile("face", "face.jpg");
-        const frontPath = await uploadFile("cnicFront", "cnic-front.jpg");
-        const backPath = await uploadFile("cnicBack", "cnic-back.jpg");
+      const facePath = await uploadFile("face", "face.jpg");
+      const frontPath = await uploadFile("cnicFront", "cnic-front.jpg");
+      const backPath = await uploadFile("cnicBack", "cnic-back.jpg");
 
-        // Save to Supabase DB
-        const { error } = await supabase.from("users").upsert({
-          id: uid,
-          email,
-          business,
-          fullname,
-          guardian,
-          cnic,
-          address,
-          face_img: facePath,
-          cnic_front: frontPath,
-          cnic_back: backPath,
-        });
+      const { error } = await supabase.from("users").upsert({
+        id: uid,
+        email,
+        business,
+        fullname,
+        guardian,
+        cnic,
+        address,
+        face_img: facePath,
+        cnic_front: frontPath,
+        cnic_back: backPath,
+      });
 
-        if (error) throw error;
+      if (error) throw error;
 
-        alert("✅ Profile saved successfully!");
-        window.location.href = "dashboard.html";
+      alert("✅ Profile saved successfully!");
+      window.location.href = "dashboard.html";
 
-      } catch (err) {
-        alert("❌ Error: " + err.message);
-      }
-    });
-  </script>
-</body>
-</html>
+    } catch (err) {
+      console.error("❌ JS Error:", err); // 👈 check this in DevTools Console
+      alert("❌ Error: " + err.message);
+    }
+  });
+</script>
