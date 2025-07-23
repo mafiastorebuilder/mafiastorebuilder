@@ -9,9 +9,19 @@
       margin-top: 10px;
       display: block;
     }
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      max-width: 500px;
+      margin: auto;
+      background: #f4f4f4;
+    }
+    h2 {
+      text-align: center;
+    }
   </style>
 </head>
-<body style="font-family:sans-serif; padding:20px; max-width:500px; margin:auto;">
+<body>
 
   <h2>Mafia Store User Verification 🕵️‍♂️</h2>
 
@@ -46,82 +56,76 @@
     <button type="submit">Submit</button>
   </form>
 
-<script type="module">
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const supabase = createClient(
-  'https://vjqkznjejpzwncoelyvd.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqcWt6bmplanB6d25jb2VseXZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTg2MDgsImV4cCI6MjA2ODY3NDYwOH0.2B4HcfnDXolf7YUAaoHx5Ax2XK1pQRmcfdFl-zq4CSY'
-);
+    const supabase = createClient(
+      'https://vjqkznjejpzwncoelyvd.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqcWt6bmplanB6d25jb2VseXZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTg2MDgsImV4cCI6MjA2ODY3NDYwOH0.2B4HcfnDXolf7YUAaoHx5Ax2XK1pQRmcfdFl-zq4CSY'
+    );
 
-// 🔥 Image Preview Code (runs as soon as user selects)
-function previewImage(inputId, previewId) {
-  document.getElementById(inputId).addEventListener("change", function () {
-    const file = this.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      document.getElementById(previewId).src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-previewImage("face", "facePreview");
-previewImage("cnicFront", "frontPreview");
-previewImage("cnicBack", "backPreview");
-
-document.getElementById("profileForm").addEventListener("submit", async function(e) {
-  e.preventDefault();
-
-  try {
-    const email = localStorage.getItem("userEmail");
-    if (!email) return alert("❌ Please login first");
-
-    const uid = email.replace(/[^a-zA-Z0-9]/g, "_");
-
-    const business = document.getElementById("business").value;
-    const fullname = document.getElementById("fullname").value;
-    const guardian = document.getElementById("guardian").value;
-    const cnic = document.getElementById("cnic").value;
-    const address = document.getElementById("address").value;
-
-    async function uploadFile(inputId, path) {
+    function previewImage(inputId, previewId) {
       const file = document.getElementById(inputId).files[0];
-      if (!file) throw new Error(`Missing file for ${path}`);
-      const { data, error } = await supabase.storage.from("users").upload(`${uid}/${path}`, file, { upsert: true });
-      if (error) throw error;
-      return data.path;
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function () {
+        document.getElementById(previewId).src = reader.result;
+      };
+      reader.readAsDataURL(file);
     }
 
-    const facePath = await uploadFile("face", "face.jpg");
-    const frontPath = await uploadFile("cnicFront", "cnic-front.jpg");
-    const backPath = await uploadFile("cnicBack", "cnic-back.jpg");
+    document.getElementById("face").addEventListener("change", () => previewImage("face", "facePreview"));
+    document.getElementById("cnicFront").addEventListener("change", () => previewImage("cnicFront", "frontPreview"));
+    document.getElementById("cnicBack").addEventListener("change", () => previewImage("cnicBack", "backPreview"));
 
-    const { error } = await supabase.from("users").upsert({
-      id: uid,
-      email,
-      business,
-      fullname,
-      guardian,
-      cnic,
-      address,
-      face_img: facePath,
-      cnic_front: frontPath,
-      cnic_back: backPath,
+    document.getElementById("profileForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      try {
+        const email = localStorage.getItem("userEmail");
+        if (!email) return alert("❌ Please login first");
+
+        const folder = email.replace(/[^a-zA-Z0-9]/g, "_");
+
+        const business = document.getElementById("business").value;
+        const fullname = document.getElementById("fullname").value;
+        const guardian = document.getElementById("guardian").value;
+        const cnic = document.getElementById("cnic").value;
+        const address = document.getElementById("address").value;
+
+        async function uploadFile(inputId, fileName) {
+          const file = document.getElementById(inputId).files[0];
+          const { data, error } = await supabase.storage.from("users").upload(`${folder}/${fileName}`, file, { upsert: true });
+          if (error) throw error;
+          return data.path;
+        }
+
+        const facePath = await uploadFile("face", "face.jpg");
+        const frontPath = await uploadFile("cnicFront", "cnic-front.jpg");
+        const backPath = await uploadFile("cnicBack", "cnic-back.jpg");
+
+        const { error } = await supabase.from("users").upsert({
+          email, // primary key
+          business,
+          fullname,
+          guardian,
+          cnic,
+          address,
+          face_img: facePath,
+          cnic_front: frontPath,
+          cnic_back: backPath,
+        });
+
+        if (error) throw error;
+
+        alert("✅ Profile saved successfully!");
+        window.location.href = "dashboard.html";
+
+      } catch (err) {
+        console.error(err);
+        alert("❌ Error: " + err.message);
+      }
     });
-
-    if (error) throw error;
-
-    alert("✅ Profile saved successfully!");
-    window.location.href = "dashboard.html";
-
-  } catch (err) {
-    console.error("❌ JS Error:", err);
-    alert("❌ Error: " + err.message);
-  }
-});
-</script>
-
+  </script>
 </body>
 </html>
