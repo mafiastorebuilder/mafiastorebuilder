@@ -33,6 +33,7 @@
       border: none;
       font-size: 1rem;
       cursor: pointer;
+      margin-top: 10px;
     }
     button:hover {
       background: #16a34a;
@@ -53,7 +54,7 @@
 
     const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // ✅ Auto-fill saved email
+    // Auto-fill saved email
     window.onload = () => {
       const savedEmail = localStorage.getItem("userEmail");
       if (savedEmail) {
@@ -66,14 +67,14 @@
 
       const email = document.getElementById('email').value;
 
-      // ✅ Save to Supabase (if not already exists)
+      // Save to Supabase
       const { error } = await supabase.from('users').insert([{ email }]);
 
       if (error && error.code !== '23505') {
         alert("❌ Login failed: " + error.message);
       } else {
         localStorage.setItem("userEmail", email);
-        window.location.href = "setup-business.html";
+        window.location.href = "profile.html";
       }
     });
   </script>
