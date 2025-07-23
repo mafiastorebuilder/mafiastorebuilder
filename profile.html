@@ -73,9 +73,9 @@
     );
 
     // 🔐 Force Login Check
-    const email = localStorage.getItem("userEmail");
-    if (!email) {
-      alert("❌ Please login first!");
+    const email = localStorage.getItem("user_email");
+if (!email) return alert("❌ Please login first");
+
       window.location.href = "index.html";
     }
 
